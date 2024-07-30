@@ -9,7 +9,7 @@ class SimpleSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.only(
-          left: 15.0, right: 15.0, top: 10.0, bottom: 10.0),
+          left: 10.0, right: 10.0, top: 10.0, bottom: 10.0),
       decoration: BoxDecoration(
         color: Colors.blue[200],
         borderRadius: BorderRadius.circular(8.0),

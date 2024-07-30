@@ -10,7 +10,6 @@ class HomeContent extends StatefulWidget {
 }
 
 class _HomeContentState extends State<HomeContent> {
-  List<Contact> 
   @override
   Widget build(BuildContext context) {
     return Scaffold(

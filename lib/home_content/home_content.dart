@@ -1,4 +1,5 @@
 import 'package:digi_card/constant/color_pallete.dart';
+import 'package:digi_card/home_content/search_field.dart';
 import 'package:flutter/material.dart';
 
 class HomeContent extends StatefulWidget {
@@ -14,29 +15,29 @@ class _HomeContentState extends State<HomeContent> {
     return Scaffold(
       body: Column(
         children: [
-          SizedBox(
-            height: 30.0,
-          ),
+          const SizedBox(height: 30.0),
           Padding(
-            padding: const EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0),
+            padding: const EdgeInsets.only(left: 8.0, top: 10.0, right: 8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
+                const Text(
                   "Contacts",
                   style: TextStyle(fontSize: 30.0, color: Colors.black87),
                 ),
                 IconButton(
                   onPressed: () {},
-                  icon: Icon(
+                  icon: const Icon(
                     Icons.person_add,
-                    size: 30.0,
+                    size: 28.0,
                     color: ColorPallete.colorSelect,
                   ),
                 ),
               ],
             ),
-          )
+          ),
+          const SizedBox(height: 10.0),
+          SearchBarField(),
         ],
       ),
     );

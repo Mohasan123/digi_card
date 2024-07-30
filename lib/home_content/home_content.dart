@@ -17,7 +17,7 @@ class _HomeContentState extends State<HomeContent> {
         children: [
           const SizedBox(height: 30.0),
           Padding(
-            padding: const EdgeInsets.only(left: 8.0, top: 10.0, right: 8.0),
+            padding: const EdgeInsets.only(left: 10.0, top: 10.0, right: 10.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -35,9 +35,7 @@ class _HomeContentState extends State<HomeContent> {
                 ),
               ],
             ),
-          ),
-          const SizedBox(height: 10.0),
-          SearchBarField(),
+          )
         ],
       ),
     );

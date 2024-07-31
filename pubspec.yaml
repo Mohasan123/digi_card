@@ -37,7 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   awesome_bottom_bar: ^1.2.4
   icony: ^1.0.5
-  flutter_contacts: ^1.1.9
+  
 
 dev_dependencies:
   flutter_test:

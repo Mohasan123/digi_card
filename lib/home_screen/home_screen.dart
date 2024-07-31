@@ -17,9 +17,9 @@ double height = 30;
 
 
 final List<Widget> _screens = [
-  HomeContent(),
-  CameraScreen(),
-  ProfileScreen(),
+  const HomeContent(),
+  const CameraScreen(),
+  const ProfileScreen(),
 ];
 const List<TabItem> items = [
   TabItem(

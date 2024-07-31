@@ -11,7 +11,7 @@ class SimpleSearchBar extends StatelessWidget {
       margin: const EdgeInsets.only(
           left: 10.0, right: 10.0, top: 10.0, bottom: 10.0),
       decoration: BoxDecoration(
-        color: Colors.blue[200],
+        color: Color.fromARGB(255, 155, 176, 202),
         borderRadius: BorderRadius.circular(8.0),
       ),
       child: TextField(

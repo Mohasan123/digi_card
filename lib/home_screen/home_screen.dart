@@ -15,7 +15,6 @@ class HomeScreen extends StatefulWidget {
 int visit = 0;
 double height = 30;
 
-
 final List<Widget> _screens = [
   const HomeContent(),
   const CameraScreen(),

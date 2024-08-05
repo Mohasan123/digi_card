@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:awesome_bottom_bar/awesome_bottom_bar.dart';
 import 'package:digi_card/camera_screen/camera_screen.dart';
 import 'package:digi_card/constant/color_pallete.dart';
@@ -12,13 +14,15 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-int visit = 0;
 double height = 30;
 
 final List<Widget> _screens = [
   const HomeContent(),
   const CameraScreen(),
-  const ProfileScreen(),
+  const ProfileScreen(
+    cardInfo: {},
+    imageFile: null,
+  ),
 ];
 const List<TabItem> items = [
   TabItem(
@@ -36,6 +40,8 @@ const List<TabItem> items = [
 ];
 
 class _HomeScreenState extends State<HomeScreen> {
+  int visit = 0;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -43,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.only(bottom: 10, right: 10, left: 10),
         child: BottomBarCreative(
-          iconSize: 30.0,
+          iconSize: 35.0,
           borderRadius: BorderRadius.circular(20.0),
           items: items,
           backgroundColor: ColorPallete.bgColor,

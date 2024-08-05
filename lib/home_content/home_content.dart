@@ -13,12 +13,12 @@ class HomeContent extends StatefulWidget {
 class _HomeContentState extends State<HomeContent> {
   List<Contact> _contacts = [];
 
+
   @override
   void initState() {
     super.initState();
     _getContacts();
   }
-
   Future<void> _getContacts() async {
     if (await FlutterContacts.requestPermission()) {
       List<Contact> contacts = await FlutterContacts.getContacts(

@@ -8,4 +8,8 @@ class ColorPallete {
   static const Color bgColor = Color.fromRGBO(255, 255, 255, 1);
   static const Color color3 = Color.fromRGBO(103, 137, 235, 1);
   static const Color colorDivider = Color.fromRGBO(239, 243, 253, 1);
+  static const gradiantColor = LinearGradient(colors: [
+    Color.fromRGBO(239, 243, 253, 1),
+    Color.fromRGBO(246, 246, 247, 0)
+  ], begin: Alignment.topLeft, end: Alignment.bottomRight);
 }

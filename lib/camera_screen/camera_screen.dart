@@ -1,3 +1,4 @@
+import 'package:digi_card/constant/color_pallete.dart';
 import 'package:digi_card/profile_screen/profile_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
@@ -164,6 +165,7 @@ class _CameraScreenState extends State<CameraScreen> {
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: FloatingActionButton(
+                backgroundColor: ColorPallete.bgColor,
                 onPressed: () async {
                   try {
                     // Inside the FloatingActionButton's onPressed callback
@@ -190,12 +192,15 @@ class _CameraScreenState extends State<CameraScreen> {
                   } catch (e) {
                     print('Error capturing or processing image: $e');
                     ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
+                      const SnackBar(
                           content: Text('Error capturing or processing image')),
                     );
                   }
                 },
-                child: Icon(Icons.camera_alt),
+                child: const Icon(
+                  Icons.camera_alt,
+                  color: ColorPallete.colorSelect,
+                ),
               ),
             ),
           ),

@@ -47,11 +47,17 @@ dependencies:
   path_provider: ^2.1.4
   google_ml_text_recognizer: ^0.0.3
   permission_handler: ^11.3.1
+  iconsax_flutter: ^1.0.0
+  flutter_svg: ^1.1.6
+ 
+ 
   
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
+
+
 
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
@@ -59,6 +65,7 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^3.0.0
+  flutter_launcher_icons: ^0.13.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -73,7 +80,8 @@ flutter:
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/icons/icon_png.png
+    - assets/
+    - assets/icons/logo_svg.svg
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
@@ -101,3 +109,9 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icons/icon_png.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true

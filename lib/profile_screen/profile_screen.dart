@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:digi_card/business_card_screen/business_card.dart';
 import 'package:digi_card/constant/color_pallete.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
@@ -17,6 +18,7 @@ class ProfileScreen extends StatefulWidget {
 
 class _ProfileScreenState extends State<ProfileScreen> {
   late Map<String, List<TextEditingController>> controllers;
+  List<String> customFields = [];
   File? _avatarFile;
   List<String> fieldLabels = [
     'name',
@@ -181,15 +183,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
               onPressed: () {
                 if (labelText != null && labelText!.isNotEmpty) {
                   setState(() {
-                    if (!controllers.containsKey(labelText)) {
+                    // Add the new label to the fieldLabels list if it doesn't exist
+                    if (!fieldLabels.contains(labelText)) {
+                      fieldLabels.add(labelText!);
                       controllers[labelText!] = [TextEditingController()];
-                      print("create field success !!");
+                      print(
+                          "Field created successfully with label: $labelText");
+                      print(
+                          "Current field labels: $fieldLabels"); // Debug print
                     } else {
                       _addTextField(labelText!);
-                      print("create field not success !!");
+                      print("Additional field added for label: $labelText");
                     }
                   });
                   Navigator.pop(context); // Close the dialog
+                } else {
+                  print("Label text is null or empty");
                 }
               },
               child: const Text(
@@ -214,6 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    print("Building UI with fields: $fieldLabels"); // Debug print
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -269,32 +279,29 @@ class _ProfileScreenState extends State<ProfileScreen> {
           ),
           const SizedBox(height: 10),
           Expanded(
-              child: SingleChildScrollView(
-            child: Column(
-              children: [
-                ...fieldLabels.map((label) => Column(
-                      children: [
-                        ...controllers[label]!.map((controller) =>
-                            buildTextField(label, controller,
-                                controllers[label]!.indexOf(controller))),
-                        const Divider(),
-                      ],
-                    )),
-                IconButton(
-                    onPressed: () {
-                      setState(() {
-                        _showAddFieldDialog();
-                      });
-                    },
-                    icon: const Icon(
-                      Iconsax.additem_copy,
-                      size: 30.0,
-                      color: ColorPallete.colorSelect,
-                    )),
-                const SizedBox(height: 10.0),
-              ],
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  ...fieldLabels.map((label) => Column(
+                        children: [
+                          ...controllers[label]!.map((controller) =>
+                              buildTextField(label, controller,
+                                  controllers[label]!.indexOf(controller))),
+                          const Divider(),
+                        ],
+                      )),
+                  IconButton(
+                      onPressed: _showAddFieldDialog,
+                      icon: const Icon(
+                        Iconsax.additem_copy,
+                        size: 30.0,
+                        color: ColorPallete.colorSelect,
+                      )),
+                  const SizedBox(height: 10.0),
+                ],
+              ),
             ),
-          )),
+          ),
         ],
       ),
       floatingActionButton: FloatingActionButton(
@@ -311,61 +318,53 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Widget buildTextField(
       String label, TextEditingController controller, int index) {
+    final String labelCapitalized = capitalize(label);
+    bool showAddButton =
+        ['phone', 'email', 'address', 'website'].contains(label);
+
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+      padding: const EdgeInsets.all(8.0),
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Container(
-                width: 80,
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
                 child: Text(
-                  label.capitalize(),
+                  labelCapitalized,
                   style: const TextStyle(
-                    fontSize: 18.0,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      color: ColorPallete.colorSelect,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600),
                 ),
               ),
+              const SizedBox(width: 10.0),
               Expanded(
                 child: TextField(
-                  textAlign: TextAlign.end,
+                  textAlign: TextAlign.center,
                   controller: controller,
                   decoration: InputDecoration(
-                    border: InputBorder.none,
-                    hintText: 'Enter $label',
+                    hintText: 'Enter ${labelCapitalized}',
+                    border: InputBorder.none, // No border for text fields
+                  ),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: Colors.black87,
                   ),
                 ),
               ),
-              Row(
-                children: [
-                  // Only show the "+" and "-" buttons for the last TextField in the list
-                  if ((label == 'phone' ||
-                          label == 'email' ||
-                          label == 'address' ||
-                          label == 'website') &&
-                      index == controllers[label]!.length - 1)
-                    Row(
-                      children: [
-                        if (controllers[label]!.length < 3)
-                          IconButton(
-                            onPressed: () => _addTextField(label),
-                            icon: const Icon(
-                              Icons.add_circle,
-                              color: Colors.green,
-                            ),
-                          ),
-                        if (controllers[label]!.length > 1)
-                          IconButton(
-                            icon: const Icon(Icons.remove_circle,
-                                color: Colors.red),
-                            onPressed: () => _removeTextField(label, index),
-                          ),
-                      ],
-                    ),
-                ],
-              ),
+              if (showAddButton && controllers[label]!.length > 1)
+                IconButton(
+                  icon:
+                      const Icon(Icons.remove_circle, color: Colors.redAccent),
+                  onPressed: () => _removeTextField(label, index),
+                ),
+              if (showAddButton && controllers[label]!.length < 3)
+                IconButton(
+                  icon: const Icon(Iconsax.add_circle,
+                      color: Colors.lightBlueAccent),
+                  onPressed: () => _addTextField(label),
+                ),
             ],
           ),
         ],
@@ -374,19 +373,27 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   void _saveProfile() {
+    // Saving logic, possibly saving to a database or state management solution
+    // Prepare the cardInfo map from controllers to pass it
+    Map<String, String> cardInfo = {};
     controllers.forEach((key, controllerList) {
       for (var controller in controllerList) {
-        print('$key: ${controller.text}');
+        cardInfo[key] = controller.text;
       }
     });
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Profile information saved')),
+
+    // Navigate to the BusinessCardScreen with the collected card info
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => BusinessCardScreen(
+          controllers: cardInfo,
+          avatarFile: _avatarFile,
+        ),
+      ),
     );
   }
-}
 
-extension StringExtension on String {
-  String capitalize() {
-    return "${this[0].toUpperCase()}${this.substring(1)}";
-  }
+  String capitalize(String s) =>
+      s.isNotEmpty ? '${s[0].toUpperCase()}${s.substring(1)}' : s;
 }

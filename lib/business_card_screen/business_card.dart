@@ -2,8 +2,11 @@ import 'dart:io';
 import 'package:digi_card/constant/color_pallete.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:screenshot/screenshot.dart';
 
-class BusinessCardScreen extends StatelessWidget {
+class BusinessCardScreen extends StatefulWidget {
   final Map<String, String> controllers;
   final File? avatarFile;
 
@@ -13,6 +16,17 @@ class BusinessCardScreen extends StatelessWidget {
     this.avatarFile,
   }) : super(key: key);
 
+  @override
+  State<BusinessCardScreen> createState() => _BusinessCardScreenState();
+}
+
+class _BusinessCardScreenState extends State<BusinessCardScreen> {
+  // Track the selected cards
+  final List<int> selectedCards = [];
+
+  // List of ScreenshotControllers, one for each card
+  final List<ScreenshotController> screenshotControllers =
+      List.generate(4, (_) => ScreenshotController());
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -26,7 +40,7 @@ class BusinessCardScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Iconsax.arrow_square_left_copy,
                       color: ColorPallete.colorSelect,
                       size: 30,
@@ -36,7 +50,7 @@ class BusinessCardScreen extends StatelessWidget {
                     },
                   ),
                   IconButton(
-                    icon: Icon(
+                    icon: const Icon(
                       Iconsax.add_square_copy,
                       color: ColorPallete.colorSelect,
                       size: 30,
@@ -44,6 +58,18 @@ class BusinessCardScreen extends StatelessWidget {
                     onPressed: () {
                       // Implement the functionality to add another business card
                     },
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Iconsax.save_2_copy,
+                      color: Colors.blue,
+                      size: 30,
+                    ),
+                    onPressed: selectedCards.isEmpty
+                        ? null
+                        : () {
+                            downloadSelectedCards();
+                          },
                   ),
                 ],
               ),
@@ -56,20 +82,17 @@ class BusinessCardScreen extends StatelessWidget {
                       const EdgeInsets.only(bottom: 16), // Add padding here
                   child: Column(
                     children: [
-                      // Main Business Card with enhancements
-                      buildBusinessCard(context, Colors.blueGrey, Colors.white,
-                          Colors.amber.shade100),
-                      SizedBox(height: 12),
-                      // Additional Business Cards with variations
-                      buildBusinessCard(
-                          context, Colors.indigo, Colors.white, Colors.white54),
-                      SizedBox(height: 12),
-                      buildBusinessCard(context, Colors.teal, Colors.white,
-                          Colors.teal.shade500),
-                      SizedBox(height: 12),
-
-                      buildBusinessCard(context, Colors.deepOrange,
-                          Colors.white, Colors.deepOrange.shade400),
+                      buildSelectableCard(context, 0, Colors.blueGrey,
+                          Colors.white, Colors.amber.shade100),
+                      const SizedBox(height: 12),
+                      buildSelectableCard(context, 1, Colors.indigo,
+                          Colors.white, Colors.white70),
+                      const SizedBox(height: 12),
+                      buildSelectableCard(context, 2, Colors.teal, Colors.white,
+                          Colors.white70),
+                      const SizedBox(height: 12),
+                      buildSelectableCard(context, 3, Colors.deepOrange,
+                          Colors.white, Colors.white70),
                     ],
                   ),
                 ),
@@ -77,6 +100,40 @@ class BusinessCardScreen extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // Function to build selectable cards
+  Widget buildSelectableCard(BuildContext context, int index, Color startColor,
+      Color endColor, Color textColor) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          if (selectedCards.contains(index)) {
+            selectedCards.remove(index);
+          } else {
+            selectedCards.add(index);
+          }
+        });
+      },
+      child: Stack(
+        children: [
+          Screenshot(
+            controller: screenshotControllers[index],
+            child: buildBusinessCard(context, startColor, endColor, textColor),
+          ),
+          if (selectedCards.contains(index))
+            const Positioned(
+              top: 10,
+              right: 10,
+              child: Icon(
+                Icons.check_circle,
+                color: Colors.green,
+                size: 25,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -100,7 +157,7 @@ class BusinessCardScreen extends StatelessWidget {
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            boxShadow: [
+            boxShadow: const [
               BoxShadow(
                 color: Colors.black26,
                 blurRadius: 10,
@@ -125,10 +182,10 @@ class BusinessCardScreen extends StatelessWidget {
                   Expanded(
                     flex: 1,
                     child: Container(
-                      padding: EdgeInsets.all(16),
+                      padding: const EdgeInsets.all(16),
                       decoration: BoxDecoration(
                         color: Colors.black.withOpacity(0.2),
-                        borderRadius: BorderRadius.only(
+                        borderRadius: const BorderRadius.only(
                           topLeft: Radius.circular(16),
                           bottomLeft: Radius.circular(16),
                         ),
@@ -141,11 +198,11 @@ class BusinessCardScreen extends StatelessWidget {
                             backgroundColor: Colors.white,
                             child: CircleAvatar(
                               radius: 45,
-                              backgroundImage: avatarFile != null
-                                  ? FileImage(avatarFile!)
+                              backgroundImage: widget.avatarFile != null
+                                  ? FileImage(widget.avatarFile!)
                                   : null,
                               backgroundColor: Colors.grey[300],
-                              child: avatarFile == null
+                              child: widget.avatarFile == null
                                   ? Icon(
                                       Icons.business,
                                       size: 50,
@@ -154,11 +211,11 @@ class BusinessCardScreen extends StatelessWidget {
                                   : null,
                             ),
                           ),
-                          SizedBox(height: 16),
+                          const SizedBox(height: 16),
                           Text(
-                            controllers['company'] ?? 'Company Name',
+                            widget.controllers['company'] ?? 'Company Name',
                             style: TextStyle(
-                              fontSize: 26,
+                              fontSize: 20,
                               fontWeight: FontWeight.bold,
                               color: textColor,
                             ),
@@ -177,7 +234,7 @@ class BusinessCardScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            controllers['name'] ?? 'Name',
+                            widget.controllers['name'] ?? 'Name',
                             style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w600,
@@ -185,28 +242,36 @@ class BusinessCardScreen extends StatelessWidget {
                             ),
                           ),
                           Text(
-                            controllers['title'] ?? 'Title',
+                            widget.controllers['title'] ?? 'Title',
                             style: TextStyle(
                               fontSize: 20,
                               color: textColor.withOpacity(0.8),
                             ),
                           ),
-                          SizedBox(height: 8),
+                          const SizedBox(height: 8),
                           Divider(
                             color: textColor.withOpacity(0.7),
                             thickness: 1.5,
                             indent: 20,
                             endIndent: 20,
                           ),
-                          SizedBox(height: 8),
-                          buildContactRow(Icons.phone,
-                              controllers['phone'] ?? 'Phone', textColor),
-                          buildContactRow(Icons.email,
-                              controllers['email'] ?? 'Email', textColor),
-                          buildContactRow(Icons.web,
-                              controllers['website'] ?? 'Website', textColor),
-                          buildContactRow(Icons.location_on,
-                              controllers['address'] ?? 'Address', textColor),
+                          const SizedBox(height: 8),
+                          buildContactRow(
+                              Icons.phone,
+                              widget.controllers['phone'] ?? 'Phone',
+                              textColor),
+                          buildContactRow(
+                              Icons.email,
+                              widget.controllers['email'] ?? 'Email',
+                              textColor),
+                          buildContactRow(
+                              Icons.web,
+                              widget.controllers['website'] ?? 'Website',
+                              textColor),
+                          buildContactRow(
+                              Icons.location_on,
+                              widget.controllers['address'] ?? 'Address',
+                              textColor),
                         ],
                       ),
                     ),
@@ -230,10 +295,10 @@ class BusinessCardScreen extends StatelessWidget {
               color: textColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            padding: EdgeInsets.all(6),
+            padding: const EdgeInsets.all(6),
             child: Icon(icon, color: textColor),
           ),
-          SizedBox(width: 8),
+          const SizedBox(width: 8),
           Expanded(
             child: Text(
               text,
@@ -244,5 +309,23 @@ class BusinessCardScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  // Function to handle downloading selected cards
+  Future<void> downloadSelectedCards() async {
+    for (int index in selectedCards) {
+      final directory =
+          await getExternalStorageDirectory(); // For external storage
+      final imagesDir = Directory(join(directory!.path, 'Pictures'));
+      if (!await imagesDir.exists()) {
+        await imagesDir.create(recursive: true);
+      }
+
+      final imagePath = join(imagesDir.path, 'business_card_$index.png');
+      final imageFile =
+          await screenshotControllers[index].captureAndSave(imagePath);
+
+      print('Saved: $imageFile');
+    }
   }
 }

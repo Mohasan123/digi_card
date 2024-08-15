@@ -1,9 +1,12 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:digi_card/constant/color_pallete.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
+import 'package:image_gallery_saver/image_gallery_saver.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 import 'package:screenshot/screenshot.dart';
 
 class BusinessCardScreen extends StatefulWidget {
@@ -20,88 +23,34 @@ class BusinessCardScreen extends StatefulWidget {
   State<BusinessCardScreen> createState() => _BusinessCardScreenState();
 }
 
-class _BusinessCardScreenState extends State<BusinessCardScreen> {
+class _BusinessCardScreenState extends State<BusinessCardScreen>
+    with SingleTickerProviderStateMixin {
   // Track the selected cards
   final List<int> selectedCards = [];
 
   // List of ScreenshotControllers, one for each card
   final List<ScreenshotController> screenshotControllers =
       List.generate(4, (_) => ScreenshotController());
+  final List<bool> isFlipped = List.generate(4, (_) => false);
+  late final AnimationController _controller;
+  late final Animation<double> _animation;
+
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Top Bar with Back and Add buttons
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  IconButton(
-                    icon: const Icon(
-                      Iconsax.arrow_square_left_copy,
-                      color: ColorPallete.colorSelect,
-                      size: 30,
-                    ),
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Iconsax.add_square_copy,
-                      color: ColorPallete.colorSelect,
-                      size: 30,
-                    ),
-                    onPressed: () {
-                      // Implement the functionality to add another business card
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Iconsax.save_2_copy,
-                      color: Colors.blue,
-                      size: 30,
-                    ),
-                    onPressed: selectedCards.isEmpty
-                        ? null
-                        : () {
-                            downloadSelectedCards();
-                          },
-                  ),
-                ],
-              ),
-            ),
-            // Scrollable content
-            Expanded(
-              child: SingleChildScrollView(
-                child: Padding(
-                  padding:
-                      const EdgeInsets.only(bottom: 16), // Add padding here
-                  child: Column(
-                    children: [
-                      buildSelectableCard(context, 0, Colors.blueGrey,
-                          Colors.white, Colors.amber.shade100),
-                      const SizedBox(height: 12),
-                      buildSelectableCard(context, 1, Colors.indigo,
-                          Colors.white, Colors.white70),
-                      const SizedBox(height: 12),
-                      buildSelectableCard(context, 2, Colors.teal, Colors.white,
-                          Colors.white70),
-                      const SizedBox(height: 12),
-                      buildSelectableCard(context, 3, Colors.deepOrange,
-                          Colors.white, Colors.white70),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: Duration(milliseconds: 500),
+      vsync: this,
     );
+
+    _animation = Tween<double>(begin: 0, end: 1).animate(_controller);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+
+    super.dispose();
   }
 
   // Function to build selectable cards
@@ -117,23 +66,53 @@ class _BusinessCardScreenState extends State<BusinessCardScreen> {
           }
         });
       },
-      child: Stack(
-        children: [
-          Screenshot(
-            controller: screenshotControllers[index],
-            child: buildBusinessCard(context, startColor, endColor, textColor),
-          ),
-          if (selectedCards.contains(index))
-            const Positioned(
-              top: 10,
-              right: 10,
-              child: Icon(
-                Icons.check_circle,
-                color: Colors.green,
-                size: 25,
+      onLongPress: () {
+        setState(() {
+          isFlipped[index] = !isFlipped[index];
+          if (isFlipped[index]) {
+            _controller.forward();
+          } else {
+            _controller.reverse();
+          }
+        });
+      },
+      child: AnimatedSwitcher(
+        duration: Duration(milliseconds: 500),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          final rotate = animation.drive(Tween(begin: pi, end: 0.0));
+          return AnimatedBuilder(
+              animation: rotate,
+              builder: (BuildContext context, Widget? child) {
+                final isUnder = ValueKey(isFlipped[index]) != child?.key;
+                var tilt = (animation.value - 0.5).abs() - 0.5;
+                tilt *= isUnder ? -0.003 : 0.003;
+                final value =
+                    isUnder ? min(rotate.value, pi / 2) : rotate.value;
+                return Transform(
+                  transform: Matrix4.rotationY(value)..setEntry(3, 0, tilt),
+                  alignment: Alignment.center,
+                  child: child,
+                );
+              },
+              child: child);
+        },
+        layoutBuilder: (Widget? currentChild, List<Widget> prevoiusChildren) {
+          return Stack(
+            children: <Widget>[
+              if (prevoiusChildren.isNotEmpty) prevoiusChildren.last,
+              if (currentChild != null) currentChild,
+            ],
+          );
+        },
+        switchInCurve: Curves.easeInOut,
+        switchOutCurve: Curves.easeInOut,
+        child: isFlipped[index]
+            ? buildQrCodeCard(index)
+            : Screenshot(
+                controller: screenshotControllers[index],
+                child:
+                    buildBusinessCard(context, startColor, endColor, textColor),
               ),
-            ),
-        ],
       ),
     );
   }
@@ -149,7 +128,7 @@ class _BusinessCardScreenState extends State<BusinessCardScreen> {
         ),
         child: Container(
           width: 600,
-          height: 300,
+          height: 350,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             gradient: LinearGradient(
@@ -285,6 +264,49 @@ class _BusinessCardScreenState extends State<BusinessCardScreen> {
     );
   }
 
+  Widget buildQrCodeCard(int index) {
+    final phone = widget.controllers['phone'] ?? '';
+    final email = widget.controllers['email'] ?? '';
+    final website = widget.controllers['website'] ?? '';
+
+    String qrdata = '';
+    if (phone.isNotEmpty) qrdata += 'Phone: $phone\n';
+    if (email.isNotEmpty) qrdata += 'Email: $email\n';
+    if (website.isNotEmpty) qrdata += 'Website: $website\n';
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10),
+      child: Card(
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Container(
+          width: 600,
+          height: 300,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: const [
+              BoxShadow(
+                color: Colors.black26,
+                blurRadius: 10,
+                offset: Offset(0, 4),
+              ),
+            ],
+          ),
+          child: Center(
+            child: QrImageView(
+              data: qrdata,
+              version: QrVersions.auto,
+              size: 100,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget buildContactRow(IconData icon, String text, Color textColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2.0),
@@ -314,18 +336,93 @@ class _BusinessCardScreenState extends State<BusinessCardScreen> {
   // Function to handle downloading selected cards
   Future<void> downloadSelectedCards() async {
     for (int index in selectedCards) {
-      final directory =
-          await getExternalStorageDirectory(); // For external storage
-      final imagesDir = Directory(join(directory!.path, 'Pictures'));
-      if (!await imagesDir.exists()) {
-        await imagesDir.create(recursive: true);
+      final capturedImage = await screenshotControllers[index].capture();
+
+      if (capturedImage != null) {
+        final result = await ImageGallerySaver.saveImage(
+          capturedImage,
+          quality: 80,
+          name: 'business_card_$index',
+        );
+        print('Saved to gallery: $result');
       }
-
-      final imagePath = join(imagesDir.path, 'business_card_$index.png');
-      final imageFile =
-          await screenshotControllers[index].captureAndSave(imagePath);
-
-      print('Saved: $imageFile');
     }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Bar with Back and Add buttons
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  IconButton(
+                    icon: const Icon(
+                      Iconsax.arrow_square_left_copy,
+                      color: ColorPallete.colorSelect,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Iconsax.add_square_copy,
+                      color: ColorPallete.colorSelect,
+                      size: 30,
+                    ),
+                    onPressed: () {
+                      // Implement the functionality to add another business card
+                    },
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Iconsax.save_2_copy,
+                      color: Colors.blue,
+                      size: 30,
+                    ),
+                    onPressed: selectedCards.isEmpty
+                        ? null
+                        : () {
+                            downloadSelectedCards();
+                          },
+                  ),
+                ],
+              ),
+            ),
+            // Scrollable content
+            Expanded(
+              child: SingleChildScrollView(
+                child: Padding(
+                  padding:
+                      const EdgeInsets.only(bottom: 16), // Add padding here
+                  child: Column(
+                    children: [
+                      buildSelectableCard(context, 0, Colors.blueGrey,
+                          Colors.white, Colors.amber.shade300),
+                      const SizedBox(height: 12),
+                      buildSelectableCard(context, 1, Colors.indigo,
+                          Colors.white, Colors.white70),
+                      const SizedBox(height: 12),
+                      buildSelectableCard(context, 2, Colors.teal, Colors.white,
+                          Colors.white70),
+                      const SizedBox(height: 12),
+                      buildSelectableCard(context, 3, Colors.deepOrange,
+                          Colors.white, Colors.white70),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

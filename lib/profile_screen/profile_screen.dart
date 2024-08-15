@@ -4,6 +4,8 @@ import 'package:digi_card/constant/color_pallete.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax_flutter/iconsax_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
+import 'package:qr_flutter/qr_flutter.dart';
 
 class ProfileScreen extends StatefulWidget {
   final File? imageFile;
@@ -96,6 +98,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
     });
   }
 
+  Future<void> _generateQRCode() async {
+    showDialog(
+      context: context,
+      builder: (context) {
+        String qrData = 'Phone: ${controllers['phone']![0].text}\n'
+            'Email: ${controllers['email']![0].text}\n'
+            'Website: ${controllers['website']![0].text}';
+
+        return AlertDialog(
+          title: const Text('Generated QR Code'),
+          content: QrImageView(
+            data: qrData,
+            version: QrVersions.auto,
+            size: 200.0,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _showAddFieldDialog() async {
     await showDialog(
       context: context,
@@ -107,31 +137,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
             style: TextStyle(color: Colors.black87),
           ),
           content: Column(
-            mainAxisSize:
-                MainAxisSize.min, // Ensure dialog content doesn't overflow
+            mainAxisSize: MainAxisSize.min,
             children: [
               ListTile(
                 leading: const Icon(
-                  Icons.text_fields_outlined,
-                  color: ColorPallete.colorSelect,
-                  size: 30.0,
-                ),
-                title: const Text(
-                  'Text Field',
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black54,
-                  ),
-                ),
-                onTap: () {
-                  Navigator.pop(context); // Close the current dialog
-                  _showLabelDialog(); // Open the label dialog
-                },
-              ),
-              ListTile(
-                leading: const Icon(
                   Icons.qr_code_2,
-                  color: ColorPallete.colorSelect,
+                  color: Colors.blue,
                   size: 30.0,
                 ),
                 title: const Text(
@@ -142,9 +153,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   ),
                 ),
                 onTap: () {
-                  // Handle QR code addition here
-                  print("QR code option selected");
-                  Navigator.pop(context); // Close the current dialog
+                  Navigator.pop(context);
+                  _generateQRCode();
                 },
               ),
             ],
@@ -154,72 +164,116 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  Future<void> _showLabelDialog() async {
-    String? labelText;
-
+  Future<void> _showQrCodeOptions() async {
     await showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          title: const Text(
-            "Enter Label",
-            style: TextStyle(color: Colors.black87),
-          ),
-          content: TextField(
-            style: const TextStyle(
-                color: ColorPallete.colorSelect, fontWeight: FontWeight.w400),
-            onChanged: (value) {
-              labelText = value;
-            },
-            decoration: const InputDecoration(
-              border: InputBorder.none,
-              hintStyle: TextStyle(color: ColorPallete.colorSelect),
-              hintText: 'Label',
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            backgroundColor: Colors.white,
+            title: const Text(
+              "Generate QR Code",
+              style: TextStyle(color: Colors.black87),
             ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                if (labelText != null && labelText!.isNotEmpty) {
-                  setState(() {
-                    // Add the new label to the fieldLabels list if it doesn't exist
-                    if (!fieldLabels.contains(labelText)) {
-                      fieldLabels.add(labelText!);
-                      controllers[labelText!] = [TextEditingController()];
-                      print(
-                          "Field created successfully with label: $labelText");
-                      print(
-                          "Current field labels: $fieldLabels"); // Debug print
-                    } else {
-                      _addTextField(labelText!);
-                      print("Additional field added for label: $labelText");
-                    }
-                  });
-                  Navigator.pop(context); // Close the dialog
-                } else {
-                  print("Label text is null or empty");
-                }
-              },
-              child: const Text(
-                'Add',
-                style: TextStyle(color: ColorPallete.colorSelect),
+            content: Column(
+              children: [
+                _buildQRCodeOption('Phones', controllers['phone']?.first.text),
+                _buildQRCodeOption('Emails', controllers['email']?.first.text),
+                _buildQRCodeOption(
+                    'WebSites', controllers['website']?.first.text),
+              ],
+            ),
+            actions: [
+              TextButton(
+                onPressed: () {},
+                child: const Text(
+                  'close',
+                  style: TextStyle(color: ColorPallete.colorSelect),
+                ),
               ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context); // Close the dialog
-              },
-              child: const Text(
-                'Cancel',
-                style: TextStyle(color: ColorPallete.colorSelect),
-              ),
-            ),
-          ],
-        );
-      },
-    );
+            ],
+          );
+        });
   }
+
+  Widget _buildQRCodeOption(String label, String? value) {
+    return value != null && value.isNotEmpty
+        ? ListTile(
+            leading: QrImageView(
+              data: value,
+              size: 50,
+              backgroundColor: Colors.white,
+            ),
+            title: Text(label),
+            subtitle: Text(value),
+          )
+        : Container();
+  }
+  // Future<void> _showLabelDialog() async {
+  //   String? labelText;
+
+  //   await showDialog(
+  //     context: context,
+  //     builder: (context) {
+  //       return AlertDialog(
+  //         backgroundColor: Colors.white,
+  //         title: const Text(
+  //           "Enter Label",
+  //           style: TextStyle(color: Colors.black87),
+  //         ),
+  //         content: TextField(
+  //           style: const TextStyle(
+  //               color: ColorPallete.colorSelect, fontWeight: FontWeight.w400),
+  //           onChanged: (value) {
+  //             labelText = value;
+  //           },
+  //           decoration: const InputDecoration(
+  //             border: InputBorder.none,
+  //             hintStyle: TextStyle(color: ColorPallete.colorSelect),
+  //             hintText: 'Label',
+  //           ),
+  //         ),
+  //         actions: [
+  //           TextButton(
+  //             onPressed: () {
+  //               if (labelText != null && labelText!.isNotEmpty) {
+  //                 setState(() {
+  //                   // Add the new label to the fieldLabels list if it doesn't exist
+  //                   if (!fieldLabels.contains(labelText)) {
+  //                     fieldLabels.add(labelText!);
+  //                     controllers[labelText!] = [TextEditingController()];
+  //                     print(
+  //                         "Field created successfully with label: $labelText");
+  //                     print(
+  //                         "Current field labels: $fieldLabels"); // Debug print
+  //                   } else {
+  //                     _addTextField(labelText!);
+  //                     print("Additional field added for label: $labelText");
+  //                   }
+  //                 });
+  //                 Navigator.pop(context); // Close the dialog
+  //               } else {
+  //                 print("Label text is null or empty");
+  //               }
+  //             },
+  //             child: const Text(
+  //               'Add',
+  //               style: TextStyle(color: ColorPallete.colorSelect),
+  //             ),
+  //           ),
+  //           TextButton(
+  //             onPressed: () {
+  //               Navigator.pop(context); // Close the dialog
+  //             },
+  //             child: const Text(
+  //               'Cancel',
+  //               style: TextStyle(color: ColorPallete.colorSelect),
+  //             ),
+  //           ),
+  //         ],
+  //       );
+  //     },
+  //   );
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -284,9 +338,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 children: [
                   ...fieldLabels.map((label) => Column(
                         children: [
-                          ...controllers[label]!.map((controller) =>
-                              buildTextField(label, controller,
-                                  controllers[label]!.indexOf(controller))),
+                          if (label == 'phone')
+                            buildPhoneNumberField(label)
+                          else
+                            ...controllers[label]!.map((controller) =>
+                                buildTextField(label, controller,
+                                    controllers[label]!.indexOf(controller))),
                           const Divider(),
                         ],
                       )),
@@ -372,26 +429,80 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  void _saveProfile() {
-    // Saving logic, possibly saving to a database or state management solution
-    // Prepare the cardInfo map from controllers to pass it
-    Map<String, String> cardInfo = {};
-    controllers.forEach((key, controllerList) {
-      for (var controller in controllerList) {
-        cardInfo[key] = controller.text;
-      }
-    });
-
-    // Navigate to the BusinessCardScreen with the collected card info
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BusinessCardScreen(
-          controllers: cardInfo,
-          avatarFile: _avatarFile,
-        ),
+  Widget buildPhoneNumberField(String label) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        children: [
+          const SizedBox(height: 5.0),
+          Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                child: Text(
+                  capitalize(label),
+                  style: const TextStyle(
+                    color: ColorPallete.colorSelect,
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 10.0),
+              Expanded(
+                  child: IntlPhoneField(
+                controller: controllers[label]!.first,
+                initialCountryCode: 'US',
+                decoration: const InputDecoration(
+                    border: OutlineInputBorder(borderSide: BorderSide.none)),
+                onChanged: (phone) {
+                  setState(() {
+                    controllers[label]!.first.text = phone.completeNumber;
+                  });
+                },
+              ))
+            ],
+          ),
+        ],
       ),
     );
+  }
+
+  void _saveProfile() {
+    bool allFieldsFilled = true;
+
+    controllers.forEach((label, controllerList) {
+      for (var controller in controllerList) {
+        if (controller.text.isEmpty) {
+          allFieldsFilled = false;
+          break;
+        }
+      }
+    });
+    if (!allFieldsFilled) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+        content: Text("Please Fill out all fields before saving."),
+        backgroundColor: Colors.redAccent,
+      ));
+    } else {
+      // Saving logic, possibly saving to a database or state management solution
+      // Prepare the cardInfo map from controllers to pass it
+      Map<String, String> cardInfo = {};
+      controllers.forEach((key, controllerList) {
+        for (var controller in controllerList) {
+          cardInfo[key] = controller.text;
+        }
+      });
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (_) => BusinessCardScreen(
+            controllers: cardInfo,
+            avatarFile: _avatarFile,
+          ),
+        ),
+      );
+    }
   }
 
   String capitalize(String s) =>

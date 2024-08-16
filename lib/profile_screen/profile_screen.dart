@@ -208,72 +208,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           )
         : Container();
   }
-  // Future<void> _showLabelDialog() async {
-  //   String? labelText;
-
-  //   await showDialog(
-  //     context: context,
-  //     builder: (context) {
-  //       return AlertDialog(
-  //         backgroundColor: Colors.white,
-  //         title: const Text(
-  //           "Enter Label",
-  //           style: TextStyle(color: Colors.black87),
-  //         ),
-  //         content: TextField(
-  //           style: const TextStyle(
-  //               color: ColorPallete.colorSelect, fontWeight: FontWeight.w400),
-  //           onChanged: (value) {
-  //             labelText = value;
-  //           },
-  //           decoration: const InputDecoration(
-  //             border: InputBorder.none,
-  //             hintStyle: TextStyle(color: ColorPallete.colorSelect),
-  //             hintText: 'Label',
-  //           ),
-  //         ),
-  //         actions: [
-  //           TextButton(
-  //             onPressed: () {
-  //               if (labelText != null && labelText!.isNotEmpty) {
-  //                 setState(() {
-  //                   // Add the new label to the fieldLabels list if it doesn't exist
-  //                   if (!fieldLabels.contains(labelText)) {
-  //                     fieldLabels.add(labelText!);
-  //                     controllers[labelText!] = [TextEditingController()];
-  //                     print(
-  //                         "Field created successfully with label: $labelText");
-  //                     print(
-  //                         "Current field labels: $fieldLabels"); // Debug print
-  //                   } else {
-  //                     _addTextField(labelText!);
-  //                     print("Additional field added for label: $labelText");
-  //                   }
-  //                 });
-  //                 Navigator.pop(context); // Close the dialog
-  //               } else {
-  //                 print("Label text is null or empty");
-  //               }
-  //             },
-  //             child: const Text(
-  //               'Add',
-  //               style: TextStyle(color: ColorPallete.colorSelect),
-  //             ),
-  //           ),
-  //           TextButton(
-  //             onPressed: () {
-  //               Navigator.pop(context); // Close the dialog
-  //             },
-  //             child: const Text(
-  //               'Cancel',
-  //               style: TextStyle(color: ColorPallete.colorSelect),
-  //             ),
-  //           ),
-  //         ],
-  //       );
-  //     },
-  //   );
-  // }
 
   @override
   Widget build(BuildContext context) {
@@ -450,17 +384,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               const SizedBox(width: 10.0),
               Expanded(
-                  child: IntlPhoneField(
-                controller: controllers[label]!.first,
-                initialCountryCode: 'US',
-                decoration: const InputDecoration(
-                    border: OutlineInputBorder(borderSide: BorderSide.none)),
-                onChanged: (phone) {
-                  setState(() {
-                    controllers[label]!.first.text = phone.completeNumber;
-                  });
-                },
-              ))
+                child: IntlPhoneField(
+                  controller: controllers[label]!.first,
+                  initialCountryCode: 'US', // Default country code
+                  decoration: const InputDecoration(
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                    ),
+                  ),
+                  onChanged: (phone) {
+                    // The phone.completeNumber includes the country code and phone number
+                    // Avoid setting the controller text manually to prevent recursive updates
+                    // If you need to store the value, do so outside of the controller setting.
+                  },
+                ),
+              ),
             ],
           ),
         ],

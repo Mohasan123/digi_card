@@ -30,7 +30,7 @@ class _SignInScreenState extends State<SignInScreen> {
           child: SingleChildScrollView(
             child: Column(
               children: [
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 80.0),
                 SvgPicture.asset(
                   imageConst.imageLogin,
                   width: 200,
@@ -44,7 +44,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   "Sign in with your email and password.",
                   style: TextStyle(fontSize: 12.0),
                 ),
-                const SizedBox(height: 8.0),
+                const SizedBox(height: 10.0),
                 Padding(
                   padding: const EdgeInsets.only(
                       top: 10.0, right: 20.0, left: 20.0, bottom: 8.0),
@@ -74,7 +74,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 15.0),
                 Padding(
                   padding: const EdgeInsets.only(
                       right: 20.0, left: 20.0, bottom: 10.0),
@@ -104,7 +104,7 @@ class _SignInScreenState extends State<SignInScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20.0),
+                const SizedBox(height: 15.0),
                 Padding(
                   padding: const EdgeInsets.only(left: 20.0, right: 25.0),
                   child: Row(

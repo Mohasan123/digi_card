@@ -41,6 +41,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   scrollDirection: Axis.vertical,
                   child: Column(
                     children: [
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -71,6 +72,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -101,6 +103,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -131,6 +134,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -161,6 +165,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -191,6 +196,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -221,6 +227,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
+                      SizedBox(height: 10.0),
                       Padding(
                         padding: const EdgeInsets.only(
                             right: 20.0, left: 20.0, bottom: 8.0),
@@ -280,7 +287,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 5.0),
+                      const SizedBox(height: 8.0),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
